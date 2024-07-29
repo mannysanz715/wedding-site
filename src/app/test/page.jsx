@@ -40,13 +40,18 @@ function Test(){
   const [extraguest, setExtraguest] = useState('')
   const [rsvp, setRsvp] = useState('')
   const [guestList, setGuestList] = useState([])
-
+  let guests = []
+  
   const handleGuestList = async ()=>{
-    let guests = await getDocs(collection(db, "potential-guests"));
-    guests.forEach(document =>{
-      setGuestList(guestList => [...guestList, document.id])
+    await getDocs(collection(db, "potential-guests")).then((snapshot)=>{
+      snapshot.docs.forEach((guest)=>{
+        guests.push({...guest.data(), id: guest.id})
+      })      
+    });
+    setGuestList(guests)
+    guestList.forEach(guest=>{
+      console.log(guest.name)
     })
-    console.log(guestList)
   }
   
   const handleCheck = (e) =>{
@@ -88,10 +93,17 @@ function Test(){
         Get List
       </button>
 
-      {guestList ? guestList.map(guestId=>{
-        <p className="text-white" key={guestId}>Guest Id:{guestId}</p>
-      }
-      ) : <h1 className="text-white">No Guests</h1>}
+      {guestList[0] ? <div>
+                        <p>There are guests</p>
+                        {guestList.map(guest=>{
+                          return(
+                            <p key={guest.id}>
+                              {guest.name}
+                            </p>
+                          )
+                        })}
+                    </div>
+         : <p>There are no guests</p>}
     </>
   )
 }
